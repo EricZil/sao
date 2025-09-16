@@ -42,3 +42,12 @@ def get_by_id(message_id):
     finally:
         session.close()
 
+def get_by_user(uid):
+    session = Session()
+    try:
+        msg = session.query(SlackMessage).filter(SlackMessage.user == uid).all()
+        return msg
+    finally:
+        session.close()
+
+

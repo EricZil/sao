@@ -1,7 +1,8 @@
-import os, datetime
+import os, datetime, requests
 from dotenv import load_dotenv
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
+import db
 
 load_dotenv()
 domain = os.environ.get('DOMAIN')
@@ -32,7 +33,10 @@ def build_app(api_key, signing_secret):
                     "user": event.get("user"),
                     "time": datetime.datetime.utcnow().isoformat()
                 }
+                db.save_message(data)
                 bulk_messages.append(data)
+                return
+
 
     return app
 
