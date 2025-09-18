@@ -37,3 +37,6 @@ def get_by_user(user_id):
 def close_message(message_id):
     resolve_case(message_id)
     return jsonify({"ok": True})
+
+if __name__ == "__main__":
+    app.run()
