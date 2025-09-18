@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, create_engine
+from sqlalchemy import Column, String, DateTime, Boolean, JSON, create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import uuid, datetime
 
@@ -16,12 +16,16 @@ class SlackMessage(Base):
     text = Column(String)
     channel = Column(String, index=True)
     user = Column(String, index=True)
-    time = Column(DateTime, default=datetime.datetime.utcnow)
+    time = Column(String, default=datetime.datetime.utcnow)
+    status = Column(Boolean, default=False, index=True)
+    output = Column(JSON)
 
 engine = create_engine('sqlite:///db.sqlite', echo=True, future=True)
+Base.metadata.create_all(engine)
+
 Session = sessionmaker(bind=engine)
 
-def save_message(message):
+def save_message(message, output=None):
     session = Session()
     msg = SlackMessage(
         ts=message.get('ts', None),
@@ -29,6 +33,8 @@ def save_message(message):
         channel=message.get('channel', None),
         user=message.get('user', None),
         time=message.get('time'),
+        status=False,
+        output=output
     )
     session.add(msg)
     session.commit()
