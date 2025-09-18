@@ -1,6 +1,4 @@
 import os, datetime, json
-from logging import critical
-
 from dotenv import load_dotenv
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
@@ -8,8 +6,6 @@ import db, message
 from bot.db import save_message
 
 load_dotenv()
-domain = os.environ.get('DOMAIN')
-api_key = os.environ.get('API_KEY')
 slack_api_key = os.environ.get("SLACK_API_KEY")
 slack_signing_secret = os.environ.get("SLACK_SIGNING_SECRET")
 socket_id = os.environ.get("SOCKET_ID")
@@ -57,6 +53,7 @@ def build_app(api_key, signing_secret):
 
 
 if __name__ == "__main__":
+    print(db.get_all(True))
     app = build_app(slack_api_key, slack_signing_secret)
     handler = SocketModeHandler(app, socket_id)
     handler.start()
