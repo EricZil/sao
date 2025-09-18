@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 import db, message
-from bot.db import save_message
 
 load_dotenv()
 slack_api_key = os.environ.get("SLACK_API_KEY")
@@ -39,7 +38,7 @@ def build_app(api_key, signing_secret):
                 return
             response = json.loads(response)
             if response["severity"] in trigger_tiers:
-                save_message(data, response)
+                db.save_message(data, response)
                 client.chat_postEphemeral(
                     channel=data["channel"],
                     user=data["user"],
