@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 import os
 import db
 
-from bot.db import resolve_case
-
 load_dotenv()
 api_key = os.environ.get('API_KEY')
 
