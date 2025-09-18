@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from dotenv import load_dotenv
-import os, db
+import os
+import db
 
 from bot.db import resolve_case
 
@@ -35,7 +36,7 @@ def get_by_user(user_id):
 
 @app.post("/api/v1/messages/<message_id>/close")
 def close_message(message_id):
-    resolve_case(message_id)
+    db.resolve_case(message_id)
     return jsonify({"ok": True})
 
 if __name__ == "__main__":
