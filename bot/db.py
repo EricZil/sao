@@ -1,6 +1,7 @@
-from sqlalchemy import Column, String, DateTime, Boolean, JSON, create_engine
+from sqlalchemy import Column, String, DateTime, Boolean, JSON, select, create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-import uuid, datetime
+from sqlalchemy.inspection import inspect
+import uuid, datetime, json
 
 
 Base = declarative_base()
@@ -8,6 +9,14 @@ Base = declarative_base()
 def gen_id():
     return "msg-" + uuid.uuid4().hex[:6].upper()
 
+def _row_to_dict(obj):
+    d = {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs}
+    if isinstance(d.get("time"), (datetime.datetime, datetime.date)):
+        d["time"] = d.get("time").isoformat()
+    return d
+
+def _json_dumps(obj):
+    return json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
 
 class SlackMessage(Base):
     __tablename__ = 'slack_messages'
@@ -40,20 +49,40 @@ def save_message(message, output=None):
     session.commit()
     session.close()
 
-def get_by_id(message_id):
+def get_all(as_string=False):
     session = Session()
-    try:
-        msg = session.get(SlackMessage, message_id)
-        return msg
-    finally:
-        session.close()
+    rows = session.execute(select(SlackMessage)).scalars().all()
+    data = [_row_to_dict(r) for r in rows]
+    return _json_dumps(data) if as_string else data
 
-def get_by_user(uid):
+def get_by_id(message_id, as_string=False):
     session = Session()
-    try:
-        msg = session.query(SlackMessage).filter(SlackMessage.user == uid).all()
-        return msg
-    finally:
-        session.close()
+    row = session.get(SlackMessage, message_id)
+    data = _row_to_dict(row) if row else None
+    return _json_dumps(data) if as_string else data
 
 
+def get_by_user(uid, as_string=False):
+    session = Session()
+    rows = session.execute(
+        select(SlackMessage).where(SlackMessage.user == uid)
+    ).scalars().all()
+    data = [_row_to_dict(r) for r in rows]
+    return _json_dumps(data) if as_string else data
+
+def get_unresolved(as_string=False):
+    session = Session()
+    rows = session.execute(select(SlackMessage).where(SlackMessage.status.is_(False))).scalars().all()
+    data = [_row_to_dict(r) for r in rows]
+    return _json_dumps(data) if as_string else data
+
+def get_resolved(as_string=False):
+    session = Session()
+    rows = session.execute(select(SlackMessage).where(SlackMessage.status.is_(True))).scalars().all()
+    data = [_row_to_dict(r) for r in rows]
+    return _json_dumps(data) if as_string else data
+
+def resolve_case(message_id):
+    session = Session()
+    row = session.get(SlackMessage, message_id)
+    row = session.get(SlackMessage, message_id)
