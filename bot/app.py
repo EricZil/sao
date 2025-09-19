@@ -32,6 +32,18 @@ def get_closed_messages():
 def get_by_user(user_id):
     return jsonify({"ok": True, "user": db.get_by_user(user_id, True)})
 
+@app.get("/api/v1/stats/total")
+def get_total_resolved():
+    return jsonify({"ok": True, "amount": len(db.get_unresolved(True))})
+
+@app.get("/api/v1/stats/open")
+def get_open_stats():
+    return jsonify({"ok": True, "amount": len(db.get_unresolved(True))})
+
+@app.get("/api/v1/stats/closed")
+def get_closed_stats():
+    return jsonify({"ok": True, "amount": len(db.get_resolved(True))})
+
 @app.post("/api/v1/messages/<message_id>/close")
 def close_message(message_id):
     db.resolve_case(message_id)

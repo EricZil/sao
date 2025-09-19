@@ -46,13 +46,10 @@ def build_app(api_key, signing_secret):
                 )
                 return
             return
-
-
     return app
 
 
 if __name__ == "__main__":
-    print(db.get_all(True))
     app = build_app(slack_api_key, slack_signing_secret)
     handler = SocketModeHandler(app, socket_id)
     handler.start()
