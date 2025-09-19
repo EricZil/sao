@@ -85,4 +85,5 @@ def get_resolved(as_string=False):
 def resolve_case(message_id):
     session = Session()
     row = session.get(SlackMessage, message_id)
-    row = session.get(SlackMessage, message_id)
+    row.status = True
+    session.commit()
