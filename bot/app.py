@@ -34,7 +34,7 @@ def get_by_user(user_id):
 
 @app.get("/api/v1/stats/total")
 def get_total_resolved():
-    return jsonify({"ok": True, "amount": len(db.get_unresolved())})
+    return jsonify({"ok": True, "amount": len(db.get_all())})
 
 @app.get("/api/v1/stats/open")
 def get_open_stats():
