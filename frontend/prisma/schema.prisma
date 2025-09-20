@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  password String
+  slackId  String? @unique
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model LoginAttempt {
+  id        Int      @id @default(autoincrement())
+  password  String
+  success   Boolean
+  ip        String?
+  userAgent String?
+  timestamp DateTime @default(now())
+
+  @@map("login_attempts")
+}
