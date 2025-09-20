@@ -35,6 +35,12 @@ Rules:
             {"role": "user", "content": message},
         ]
     }
-    response = requests.post(url=api_url, json=payload)
-    data = response.json()
-    return data["choices"][0]["message"]["content"]
+    try:
+        response = requests.post(url=api_url, json=payload, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        return data["choices"][0]["message"]["content"]
+    except requests.exceptions.Timeout:
+        return '{"severity": "none", "rationale_short": "API timeout - shit took too long", "confidence": 0.0, "resolved": false}'
+    except Exception as e:
+        return '{"severity": "none", "rationale_short": "API fucked up somehow", "confidence": 0.0, "resolved": false}'

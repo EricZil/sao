@@ -29,61 +29,61 @@ class SlackMessage(Base):
     status = Column(Boolean, default=False, index=True)
     output = Column(JSON)
 
-engine = create_engine('sqlite:///db.sqlite', echo=True, future=True)
+engine = create_engine('sqlite:///db.sqlite', echo=False, future=True)
 Base.metadata.create_all(engine)
 
 Session = sessionmaker(bind=engine)
 
 def save_message(message, output=None):
-    session = Session()
-    msg = SlackMessage(
-        ts=message.get('ts', None),
-        text=message.get('text', None),
-        channel=message.get('channel', None),
-        user=message.get('user', None),
-        time=message.get('time'),
-        status=False,
-        output=output
-    )
-    session.add(msg)
-    session.commit()
-    session.close()
+    with Session() as session:
+        msg = SlackMessage(
+            ts=message.get('ts', None),
+            text=message.get('text', None),
+            channel=message.get('channel', None),
+            user=message.get('user', None),
+            time=message.get('time'),
+            status=False,
+            output=output
+        )
+        session.add(msg)
+        session.commit()
 
 def get_all(as_string=False):
-    session = Session()
-    rows = session.execute(select(SlackMessage)).scalars().all()
-    data = [_row_to_dict(r) for r in rows]
-    return _json_dumps(data) if as_string else data
+    with Session() as session:
+        rows = session.execute(select(SlackMessage)).scalars().all()
+        data = [_row_to_dict(r) for r in rows]
+        return _json_dumps(data) if as_string else data
 
 def get_by_id(message_id, as_string=False):
-    session = Session()
-    row = session.get(SlackMessage, message_id)
-    data = _row_to_dict(row) if row else None
-    return _json_dumps(data) if as_string else data
+    with Session() as session:
+        row = session.get(SlackMessage, message_id)
+        data = _row_to_dict(row) if row else None
+        return _json_dumps(data) if as_string else data
 
 
 def get_by_user(uid, as_string=False):
-    session = Session()
-    rows = session.execute(
-        select(SlackMessage).where(SlackMessage.user == uid)
-    ).scalars().all()
-    data = [_row_to_dict(r) for r in rows]
-    return _json_dumps(data) if as_string else data
+    with Session() as session:
+        rows = session.execute(
+            select(SlackMessage).where(SlackMessage.user == uid)
+        ).scalars().all()
+        data = [_row_to_dict(r) for r in rows]
+        return _json_dumps(data) if as_string else data
 
 def get_unresolved(as_string=False):
-    session = Session()
-    rows = session.execute(select(SlackMessage).where(SlackMessage.status.is_(False))).scalars().all()
-    data = [_row_to_dict(r) for r in rows]
-    return _json_dumps(data) if as_string else data
+    with Session() as session:
+        rows = session.execute(select(SlackMessage).where(SlackMessage.status.is_(False))).scalars().all()
+        data = [_row_to_dict(r) for r in rows]
+        return _json_dumps(data) if as_string else data
 
 def get_resolved(as_string=False):
-    session = Session()
-    rows = session.execute(select(SlackMessage).where(SlackMessage.status.is_(True))).scalars().all()
-    data = [_row_to_dict(r) for r in rows]
-    return _json_dumps(data) if as_string else data
+    with Session() as session:
+        rows = session.execute(select(SlackMessage).where(SlackMessage.status.is_(True))).scalars().all()
+        data = [_row_to_dict(r) for r in rows]
+        return _json_dumps(data) if as_string else data
 
 def resolve_case(message_id):
-    session = Session()
-    row = session.get(SlackMessage, message_id)
-    row.status = True
-    session.commit()
+    with Session() as session:
+        row = session.get(SlackMessage, message_id)
+        if row:
+            row.status = True
+            session.commit()
