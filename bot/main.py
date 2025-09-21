@@ -39,11 +39,6 @@ def build_app(api_key, signing_secret):
             response = json.loads(response)
             if response["severity"] in trigger_tiers:
                 db.save_message(data, response)
-                client.chat_postEphemeral(
-                    channel=data["channel"],
-                    user=data["user"],
-                    text="ok you said some wild shit fucking chill."
-                )
                 return
             return
     return app
